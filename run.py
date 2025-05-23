@@ -541,7 +541,7 @@ systemctl start {display_manager}.service
     subprocess.run(["sudo", "mv", "_", f"/etc/libvirt/hooks/qemu.d/{machine_name}/release/end/revert.sh"])
     subprocess.run(["sudo", "chmod", "+x", f"/etc/libvirt/hooks/qemu.d/{machine_name}/release/end/revert.sh"])
 
-    logger.log(f"Hooks created at /etc/libvirt/hooks/qemu.d/{machine_name}")
+    logger.info(f"Hooks created at /etc/libvirt/hooks/qemu.d/{machine_name}")
 
     add_pcie_device_to_vm(machine_name, gpu_iommu_n, f"{backup_folder}/gpu_patched.rom")
     add_pcie_device_to_vm(machine_name, gpu_audio_iommu_n, f"{backup_folder}/gpu_patched.rom")
