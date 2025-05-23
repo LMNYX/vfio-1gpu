@@ -5,6 +5,7 @@ import logging
 import inquirer
 import shutil
 import string
+import libvirt
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -265,7 +266,6 @@ def add_pcie_device_to_vm(vm_name, pcie_address, rom_file="/home/test", guest_do
     address = ET.SubElement(source, "address", domain="0x0000", bus=f"0x{bus}", slot=f"0x{slot}", function=f"0x{function}")
 
     ET.SubElement(hostdev, "rom", file=rom_file)
-    ET.SubElement(hostdev, "address", type="pci", domain=guest_domain, bus=guest_bus, slot=guest_slot, function=guest_function)
 
     devices = tree.find("devices")
     devices.append(hostdev)
