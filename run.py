@@ -467,19 +467,19 @@ virsh nodedev-reattach $VIRSH_GPU_AUDIO
 # rebind VTConsoles
 """
     for vtcon in list_vtconsole_files():
-        prepare_begin_script_contents += f"echo 1 > {vtcon}\n"
+        release_revert_script_contents += f"echo 1 > {vtcon}\n"
     if (gpu_vendor == "NVIDIA"):
-        prepare_begin_script_contents += """
+        release_revert_script_contents += """
 
 nvidia-xconfig --query-gpu-info > /dev/null 2>&1
 """
 
-    prepare_begin_script_contents += """
+    release_revert_script_contents += """
 echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
 """
 
     if (gpu_vendor == "NVIDIA"):
-        prepare_begin_script_contents += """
+        release_revert_script_contents += """
 # Load GPU NVIDIA
 modprobe nvidia_drm
 modprobe nvidia_modeset
@@ -490,7 +490,7 @@ modprobe drm
 modprobe nvidia_uvm
 """
     elif (gpu_vendor == "Advanced"):
-        prepare_begin_script_contents += """
+        release_revert_script_contents += """
 # Load GPU AMD
 modprobe snd_hda_codec_hdmi
 modprobe snd_hda_intel
@@ -499,11 +499,12 @@ modprobe drm_kms_helper
 modprobe drm"""
     else:
         logging.log("GPU is probably Intel. Modify hooks manually as it's unsupported.")
-    prepare_begin_script_contents += f"""
+    release_revert_script_contents += f"""
 
 # Start display manager
 systemctl start {display_manager}.service
 """
+    
 if __name__ == "__main__":
     logger.info("Starting the process...")
     main()
