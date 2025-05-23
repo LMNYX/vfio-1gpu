@@ -435,7 +435,7 @@ systemctl stop {display_manager}.service
 # Unbind VTConsoles"""
 
     for vtcon in list_vtconsole_files():
-        prepare_begin_script_contents += f"echo 0 > {vtcon}"
+        prepare_begin_script_contents += f"echo 0 > {vtcon}/bind\n"
 
     prepare_begin_script_contents += """
 
@@ -491,7 +491,7 @@ virsh nodedev-reattach $VIRSH_GPU_AUDIO
 # rebind VTConsoles
 """
     for vtcon in list_vtconsole_files():
-        release_revert_script_contents += f"echo 1 > {vtcon}\n"
+        release_revert_script_contents += f"echo 1 > {vtcon}/bind\n"
     if (gpu_vendor == "NVIDIA"):
         release_revert_script_contents += """
 
@@ -546,6 +546,7 @@ systemctl start {display_manager}.service
     add_pcie_device_to_vm(machine_name, gpu_iommu_n, f"{backup_folder}/gpu_patched.rom")
     add_pcie_device_to_vm(machine_name, gpu_audio_iommu_n, f"{backup_folder}/gpu_patched.rom")
 
+    logger.info("Patching complete!!")
 if __name__ == "__main__":
     logger.info("Starting the process...")
     main()
