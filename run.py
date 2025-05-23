@@ -5,6 +5,7 @@ import logging
 import inquirer
 import shutil
 import string
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -251,6 +252,29 @@ def get_qemu_machines():
         print(f"Error occurred: {e.stderr}")
         return []
 
+def add_pcie_device_to_vm(vm_name, pcie_address, rom_file="/home/test", guest_domain="0x0000", guest_bus="0x06", guest_slot="0x00", guest_function="0x0"):
+    domain = libvirt.open(None).lookupByName(vm_name)
+    xml = domain.XMLDesc()
+    tree = ET.fromstring(xml)
+
+    bus, rest = pcie_address.split(":")
+    slot, function = rest.split(".")
+
+    hostdev = ET.Element("hostdev", mode="subsystem", type="pci", managed="yes")
+    source = ET.SubElement(hostdev, "source")
+    address = ET.SubElement(source, "address", domain="0x0000", bus=f"0x{bus}", slot=f"0x{slot}", function=f"0x{function}")
+
+    ET.SubElement(hostdev, "rom", file=rom_file)
+    ET.SubElement(hostdev, "address", type="pci", domain=guest_domain, bus=guest_bus, slot=guest_slot, function=guest_function)
+
+    devices = tree.find("devices")
+    devices.append(hostdev)
+
+    new_xml = ET.tostring(tree).decode()
+    conn = libvirt.open(None)
+    conn.defineXML(new_xml)
+    print(f"PCIe device {pcie_address} added to VM '{vm_name}'.")
+
 def main():
     display_manager = get_display_manager()
     logger.info(f"Display manager is {display_manager}")
@@ -361,7 +385,7 @@ def main():
         if(manual_intervention_rom):
             logger.warn("ROM was provided manually. Please inspect the ROM with the HEX editor and confirm it's already trimmed.")
             logger.info("If the ROM isn't trimmed manually, close this script and manually trim the ROM and run the script one more time.")
-            logger.infO("If the ROM is trimmed correctly press ENTER to continue.")
+            logger.info("If the ROM is trimmed correctly press ENTER to continue.")
             input()
         shutil.copyfile(f"{backup_folder}/gpu.rom",f"{backup_folder}/gpu_patched.rom")
 
@@ -505,6 +529,23 @@ modprobe drm"""
 systemctl start {display_manager}.service
 """
     
+    with open('_', 'w') as f:
+        f.write(prepare_begin_script_contents)
+    
+    subprocess.run(["sudo", "mv", "_", f"/etc/libvirt/hooks/qemu.d/{machine_name}/prepare/begin/start.sh"])
+    subprocess.run(["sudo", "chmod", "+x", f"/etc/libvirt/hooks/qemu.d/{machine_name}/prepare/begin/start.sh"])
+
+    with open('_', 'w') as f:
+        f.write(release_revert_script_contents)
+    
+    subprocess.run(["sudo", "mv", "_", f"/etc/libvirt/hooks/qemu.d/{machine_name}/release/end/revert.sh"])
+    subprocess.run(["sudo", "chmod", "+x", f"/etc/libvirt/hooks/qemu.d/{machine_name}/release/end/revert.sh"])
+
+    logging.log(f"Hooks created at /etc/libvirt/hooks/qemu.d/{machine_name}")
+
+    add_pcie_device_to_vm(machine_name, gpu_iommu_n, f"{backup_folder}/gpu_patched.rom")
+    add_pcie_device_to_vm(machine_name, gpu_audio_iommu_n, f"{backup_folder}/gpu_patched.rom")
+
 if __name__ == "__main__":
     logger.info("Starting the process...")
     main()
