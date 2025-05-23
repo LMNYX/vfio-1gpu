@@ -5,6 +5,6 @@ A single file Python script to modify a QEMU virtual machine to use single-gpu p
 ## Running
 
 ```shell
-$ pip install -r requirements.txt
-$ python run.py
+$ sudo pip install -r requirements.txt
+$ sudo python run.py
 ```
