@@ -531,12 +531,13 @@ systemctl start {display_manager}.service
     
     with open('_', 'w') as f:
         f.write(prepare_begin_script_contents)
-    
+    logger.info(prepare_begin_script_contents)
     subprocess.run(["sudo", "mv", "_", f"/etc/libvirt/hooks/qemu.d/{machine_name}/prepare/begin/start.sh"])
     subprocess.run(["sudo", "chmod", "+x", f"/etc/libvirt/hooks/qemu.d/{machine_name}/prepare/begin/start.sh"])
 
     with open('_', 'w') as f:
         f.write(release_revert_script_contents)
+    logger.info(release_revert_script_contents)
     
     subprocess.run(["sudo", "mv", "_", f"/etc/libvirt/hooks/qemu.d/{machine_name}/release/end/revert.sh"])
     subprocess.run(["sudo", "chmod", "+x", f"/etc/libvirt/hooks/qemu.d/{machine_name}/release/end/revert.sh"])
