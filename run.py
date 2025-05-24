@@ -379,7 +379,8 @@ def main():
         raise ValueError("GPU and GPU's High Definition audio is not in the same group. Manual intervention required. Please isolate them.")
 
     logger.info("Proceeding to patch the GPU rom...")
-    attempt_patch = patch_rom(f"{backup_folder}/gpu.rom", f"{backup_folder}/gpu_patched.rom")
+    subprocess.run(["sudo", "mkdir", "/usr/share/vfio"])
+    attempt_patch = patch_rom(f"{backup_folder}/gpu.rom", f"/usr/share/vfio/gpu_patched.rom")
     if (not attempt_patch):
         logging.warn("Patching was not successful.")
         if(manual_intervention_rom):
@@ -387,7 +388,7 @@ def main():
             logger.info("If the ROM isn't trimmed manually, close this script and manually trim the ROM and run the script one more time.")
             logger.info("If the ROM is trimmed correctly press ENTER to continue.")
             input()
-        shutil.copyfile(f"{backup_folder}/gpu.rom",f"{backup_folder}/gpu_patched.rom")
+        shutil.copyfile(f"{backup_folder}/gpu.rom",f"/usr/share/vfio/gpu_patched.rom")
 
     logger.info("!! Initial setup complete.")
     logger.info("This script assumes you already have a QEMU virtual machine created in advance.")
@@ -546,8 +547,8 @@ systemctl start {display_manager}.service
 
     logger.info(f"Hooks created at /etc/libvirt/hooks/qemu.d/{machine_name}")
 
-    add_pcie_device_to_vm(machine_name, gpu_iommu_n, f"{backup_folder}/gpu_patched.rom")
-    add_pcie_device_to_vm(machine_name, gpu_audio_iommu_n, f"{backup_folder}/gpu_patched.rom")
+    add_pcie_device_to_vm(machine_name, gpu_iommu_n, f"/usr/share/vfio/gpu_patched.rom")
+    add_pcie_device_to_vm(machine_name, gpu_audio_iommu_n, f"/usr/share/vfio/gpu_patched.rom")
 
     logger.info("Patching complete!!")
 if __name__ == "__main__":
