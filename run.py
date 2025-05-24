@@ -432,7 +432,8 @@ source "/etc/libvirt/hooks/kvm.conf"
 # Stop display manager
 systemctl stop {display_manager}.service
 
-# Unbind VTConsoles"""
+# Unbind VTConsoles
+"""
 
     for vtcon in list_vtconsole_files():
         prepare_begin_script_contents += f"echo 0 > {vtcon}/bind\n"
@@ -440,6 +441,7 @@ systemctl stop {display_manager}.service
     prepare_begin_script_contents += """
 
 # Unbind EFI-framebuffer
+
 echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
 
 sleep 10"""
@@ -481,7 +483,7 @@ modprobe vfio_iommu_type1"""
 source "/etc/libvirt/hooks/kvm.conf"
 # unload vfio
 modprobe -r vfio_pci
-modprobe -r vfio_iommu
+modprobe -r vfio_iommu_type1
 modprobe -r vfio
 
 # Rebind GPU
