@@ -420,8 +420,8 @@ def main():
     subprocess.run(["sudo", "wget", "https://raw.githubusercontent.com/PassthroughPOST/VFIO-Tools/refs/heads/master/libvirt_hooks/qemu", "-O", "/etc/libvirt/hooks/qemu"])
     subprocess.run(["sudo", "chmod", "+x", "/etc/libvirt/hooks/qemu"])
 
-    kvm_conf_file_contents = f"""VIRSH_GPU_VIDEO=pci_0000_{gpu_iommu_n.replace(":", "_")}
-VIRSH_GPU_AUDIO=pci_0000_{gpu_audio_iommu_n.replace(":", "_")}"""
+    kvm_conf_file_contents = f"""VIRSH_GPU_VIDEO=pci_0000_{gpu_iommu_n.replace(":", "_").replace(".", "_")}
+VIRSH_GPU_AUDIO=pci_0000_{gpu_audio_iommu_n.replace(":", "_").replace(".", "_")}"""
     logger.info(kvm_conf_file_contents)
     with open('_', 'w') as f:
         f.write(kvm_conf_file_contents)
