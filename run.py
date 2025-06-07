@@ -312,6 +312,7 @@ def main():
         subprocess.run(["sudo", "grub-mkconfig", "-o", "/boot/grub/grub.cfg"])
 
         logger.info("IOMMU enabled, you have to reboot and run the script again.")
+        _exit(0)
 
     logger.info("Checking IOMMU groups...")
     iommu_groups = get_iommu_devices()
